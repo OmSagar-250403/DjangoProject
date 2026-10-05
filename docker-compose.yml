@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: fuelroute-postgres
+    environment:
+      POSTGRES_DB: fuelroute
+      POSTGRES_USER: fuelroute
+      POSTGRES_PASSWORD: FuelR0ute!2026
+    ports:
+      - "5433:5432"
+    volumes:
+      - fuelroute-postgres-data:/var/lib/postgresql/data
+    networks:
+      - fuelroute-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fuelroute -d fuelroute"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: fuelroute-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@fuelroute.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    ports:
+      - "5051:80"
+    volumes:
+      - ./infra/pgadmin-servers.json:/pgadmin4/servers.json:ro
+      - fuelroute-pgadmin-data:/var/lib/pgadmin
+    networks:
+      - fuelroute-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+networks:
+  fuelroute-net:
+    name: fuelroute-net
+
+volumes:
+  fuelroute-postgres-data:
+  fuelroute-pgadmin-data:

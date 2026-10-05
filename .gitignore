@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.py[cod]
+.env
+db.sqlite3
+.cache/
+*.log
+.DS_Store
+.idea/
+.vscode/
+
+# Internal API documentation - not for the public repo
+Genesys_*.pdf
