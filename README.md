@@ -29,7 +29,13 @@ python manage.py load_fuel_prices
 python manage.py geocode_stations   # ~94% offline in 2s, rest over the network
 
 # 4. Run
-python manage.py runserver
+python manage.py runserver           # http://127.0.0.1:8000
+```
+
+Optional, to browse the data in Django admin:
+
+```bash
+python manage.py createsuperuser
 ```
 
 Then:
@@ -107,6 +113,11 @@ Google Maps, Leaflet and Mapbox all decode directly.
 ### `GET /api/health/`
 
 Liveness, plus how many stations are loaded and how many have coordinates.
+
+### `GET /admin/`
+
+Django admin, for browsing the loaded stations and the geocode cache. Create a
+login with `python manage.py createsuperuser`.
 
 ---
 
