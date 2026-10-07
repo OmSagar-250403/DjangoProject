@@ -24,7 +24,7 @@ class RoutePlanner:
         self.router = router or OsrmRouter()
         self.geocoder = geocoder or GeocodingService()
 
-    def plan(self, start_text, finish_text, use_cache=True, start_fuel_gallons=0.0):
+    def plan(self, start_text, finish_text, use_cache=False, start_fuel_gallons=0.0):
         cache_key = self._cache_key(start_text, finish_text, start_fuel_gallons)
         if use_cache:
             cached = cache.get(cache_key)

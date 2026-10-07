@@ -25,7 +25,7 @@ LADDER_SPACING_MILES = 2.0
 # Pulling in for less than this is not worth the detour, so the planner skips a
 # marginally cheaper station and keeps the fuel it would have bought there for
 # the next one. Purely about producing a sane itinerary; it costs a few cents.
-MIN_PURCHASE_GALLONS = 5.0
+# MIN_PURCHASE_GALLONS = 5.0
 
 # How far along the route the departure fill-up may be. The vehicle starts with
 # an empty tank, so the first station has to be close to the origin to be a
@@ -228,10 +228,28 @@ def plan_fuel_stops(
         # the rest of the journey will actually burn.
         cheaper_ahead = [
             c for c in reachable[index + 1:]
-            if c.distance_from_start <= position + max_range + 1e-9
-            and c.price < current.price
+            if (
+                c.distance_from_start > position + 1e-9
+                and c.distance_from_start <= position + max_range + 1e-9
+                and c.price < current.price
+            )
         ]
         if cheaper_ahead:
+            print(
+                "DEBUG:",
+                current.station.name,
+                "position=", position,
+                "price=", current.price,
+                "cheaper_ahead=",
+                [
+                    (
+                        c.station.name,
+                        c.distance_from_start,
+                        c.price,
+                    )
+                    for c in cheaper_ahead[:5]
+                ],
+            )
             nearest_cheaper = min(cheaper_ahead, key=lambda c: c.distance_from_start)
             target_gallons = (
                 (nearest_cheaper.distance_from_start - position) / mpg
@@ -244,16 +262,25 @@ def plan_fuel_stops(
         target_gallons = min(target_gallons, gallons_to_finish, tank_gallons)
 
         purchase = min(tank_gallons - fuel, max(target_gallons - fuel, 0.0))
+        
+        print(
+            "DEBUG PURCHASE:",
+            current.station.name,
+            "target=", target_gallons,
+            "fuel_before=", fuel,
+            "purchase=", purchase,
+        )
 
         # Don't bother stopping for a splash of fuel: buy enough to be worth the
         # detour, unless that is all the trip still needs or the tank is small
         # enough that a bigger purchase would not fit.
-        if 0 < purchase < MIN_PURCHASE_GALLONS:
-            purchase = min(
-                tank_gallons - fuel,
-                max(purchase, min(MIN_PURCHASE_GALLONS, gallons_to_finish - fuel)),
-            )
-
+        # if 0 < purchase < MIN_PURCHASE_GALLONS:
+        #     purchase = min(
+        #         tank_gallons - fuel,
+        #         max(purchase, min(MIN_PURCHASE_GALLONS, gallons_to_finish - fuel)),
+        #     )
+        
+        
         if purchase > 1e-9:
             cost = purchase * current.price
             fuel += purchase
